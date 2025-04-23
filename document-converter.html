@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Converter - Tools Wonder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.0/docxtemplater.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: #1e40af;
+            color: #fff;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 1rem;
+        }
+
+        .nav a:hover {
+            color: #93c5fd;
+        }
+
+        /* Main Section */
+        .main {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .main h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+
+        .main p {
+            font-size: 1.1rem;
+            color: #4b5563;
+            margin-bottom: 2rem;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .upload-section input[type="file"] {
+            display: none;
+        }
+
+        .upload-label {
+            display: inline-block;
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        .upload-label:hover {
+            background: #1e40af;
+        }
+
+        .file-info {
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin: 0.5rem 0;
+        }
+
+        .convert-options {
+            margin: 1rem 0;
+            text-align: left;
+        }
+
+        .convert-options label {
+            font-size: 1rem;
+            color: #1e40af;
+            margin-right: 0.5rem;
+        }
+
+        .convert-options select {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .convert-button {
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 1rem;
+        }
+
+        .convert-button:hover {
+            background: #1e40af;
+        }
+
+        .convert-button:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        /* Result Section */
+        .result-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            margin: 2rem auto;
+            display: none;
+        }
+
+        .result-section.active {
+            display: block;
+        }
+
+        .result-section h3 {
+            font-size: 1.2rem;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-section p {
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin-bottom: 1rem;
+        }
+
+        .download-button {
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background 0.3s;
+            display: inline-block;
+        }
+
+        .download-button:hover {
+            background: #1e40af;
+        }
+
+        /* Loading Indicator */
+        .loading {
+            display: none;
+            font-size: 1rem;
+            color: #1e40af;
+            margin-top: 1rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        /* Note Section */
+        .note-section {
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .note-section a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .note-section a:hover {
+            color: #1e40af;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1e40af;
+            color: #fff;
+            padding: 2rem 0;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-logo h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo p {
+            font-size: 1rem;
+        }
+
+        .footer-contact p {
+            font-size: 1rem;
+        }
+
+        .footer-contact a {
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        .footer-links a {
+            color: #93c5fd;
+            text-decoration: none;
+            margin-left: 1rem;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header .container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav a {
+                margin: 0 0.75rem;
+            }
+
+            .main h1 {
+                font-size: 1.5rem;
+            }
+
+            .main p {
+                font-size: 1rem;
+            }
+
+            .upload-section {
+                padding: 1.5rem;
+            }
+
+            .convert-options select {
+                width: 100%;
+            }
+
+            .result-section {
+                padding: 1rem;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links a {
+                margin: 0 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">Tools Wonder</div>
+            <nav class="nav">
+                <a href="index.html">Home</a>
+                <a href="index.html#tools">Tools</a>
+                <a href="mailto:toolswonder1@gmail.com">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <section class="main">
+        <div class="container">
+            <h1>Document Converter</h1>
+            <p>Convert your documents between PDF, DOCX, and TXT formats.</p>
+
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <label for="docInput" class="upload-label">Choose Document</label>
+                <input type="file" id="docInput" accept=".pdf,.docx,.txt">
+                <div class="file-info" id="fileInfo"></div>
+                <div class="convert-options">
+                    <label for="outputFormat">Output Format:</label>
+                    <select id="outputFormat" disabled>
+                        <option value="pdf">PDF</option>
+                        <option value="docx">DOCX</option>
+                        <option value="txt">TXT</option>
+                    </select>
+                </div>
+                <button class="convert-button" id="convertButton" disabled>Convert Document</button>
+                <div class="loading" id="loadingIndicator">Converting... Please wait.</div>
+                <div class="note-section">
+                    Note: For complex documents (e.g., tables, images), consider using a <a href="https://cloudconvert.com/" target="_blank">professional service</a>.
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-section" id="resultSection">
+                <h3>Converted Document</h3>
+                <p id="resultInfo"></p>
+                <a href="#" id="downloadLink" class="download-button">Download Converted File</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3>Tools Wonder</h3>
+                    <p>Simplifying your digital life.</p>
+                </div>
+                <div class="footer-contact">
+                    <p>Contact: <a href="mailto:toolswonder1@gmail.com">toolswonder1@gmail.com</a></p>
+                </div>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const docInput = document.getElementById('docInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const outputFormat = document.getElementById('outputFormat');
+        const convertButton = document.getElementById('convertButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultSection = document.getElementById('resultSection');
+        const resultInfo = document.getElementById('resultInfo');
+        const downloadLink = document.getElementById('downloadLink');
+
+        let inputFile = null;
+
+        // Handle file input
+        docInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const validTypes = [
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'text/plain'
+            ];
+            if (file && validTypes.includes(file.type)) {
+                inputFile = file;
+                fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                outputFormat.disabled = false;
+                convertButton.disabled = false;
+                resultSection.classList.remove('active');
+            } else {
+                alert('Please select a valid PDF, DOCX, or TXT file.');
+                docInput.value = '';
+                fileInfo.textContent = '';
+                outputFormat.disabled = true;
+                convertButton.disabled = true;
+                inputFile = null;
+                resultSection.classList.remove('active');
+            }
+        });
+
+        // Convert document
+        convertButton.addEventListener('click', async () => {
+            if (!inputFile) return;
+
+            loadingIndicator.classList.add('active');
+            convertButton.disabled = true;
+
+            try {
+                const inputType = inputFile.type;
+                const outputType = outputFormat.value;
+                let blob, filename;
+
+                // Extract text based on input type
+                let textContent = '';
+
+                if (inputType === 'application/pdf') {
+                    const arrayBuffer = await inputFile.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const text = await page.getTextContent();
+                        textContent += text.items.map(item => item.str).join(' ') + '\n';
+                    }
+                } else if (inputType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                    // Note: Client-side DOCX text extraction is complex; using simplified approach
+                    alert('DOCX text extraction is limited. Full formatting may not be preserved.');
+                    const arrayBuffer = await inputFile.arrayBuffer();
+                    const zip = await JSZip.loadAsync(arrayBuffer);
+                    const xml = await zip.file('word/document.xml')?.async('string');
+                    if (xml) {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(xml, 'application/xml');
+                        const textNodes = doc.getElementsByTagName('w:t');
+                        for (let node of textNodes) {
+                            textContent += node.textContent + ' ';
+                        }
+                    }
+                } else if (inputType === 'text/plain') {
+                    textContent = await inputFile.text();
+                }
+
+                // Generate output based on output type
+                if (outputType === 'pdf') {
+                    const pdfDoc = await PDFLib.PDFDocument.create();
+                    const page = pdfDoc.addPage();
+                    const { width, height } = page.getSize();
+                    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+                    const fontSize = 12;
+                    const lines = textContent.split('\n');
+                    let y = height - 50;
+                    for (const line of lines) {
+                        if (y < 50) {
+                            page = pdfDoc.addPage();
+                            y = height - 50;
+                        }
+                        page.drawText(line, { x: 50, y, font, size: fontSize });
+                        y -= fontSize + 5;
+                    }
+                    const pdfBytes = await pdfDoc.save();
+                    blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                    filename = 'converted-document.pdf';
+                } else if (outputType === 'docx') {
+                    const zip = new JSZip();
+                    zip.file('word/document.xml', `
+                        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+                            <w:body>
+                                <w:p>
+                                    <w:r>
+                                        <w:t>${textContent.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>')}</w:t>
+                                    </w:r>
+                                </w:p>
+                            </w:body>
+                        </w:document>
+                    `);
+                    zip.file('[Content_Types].xml', `
+                        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                        <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+                            <Default Extension="xml" ContentType="application/xml"/>
+                            <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+                        </Types>
+                    `);
+                    zip.file('word/_rels/document.xml.rels', `
+                        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                        <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+                        </Relationships>
+                    `);
+                    blob = await zip.generateAsync({ type: 'blob' });
+                    filename = 'converted-document.docx';
+                } else if (outputType === 'txt') {
+                    blob = new Blob([textContent], { type: 'text/plain' });
+                    filename = 'converted-document.txt';
+                }
+
+                // Create download link
+                const url = URL.createObjectURL(blob);
+                downloadLink.href = url;
+                downloadLink.download = filename;
+                resultInfo.textContent = `Converted to ${outputType.toUpperCase()}. Size: ${(blob.size / 1024).toFixed(2)} KB`;
+                resultSection.classList.add('active');
+
+                loadingIndicator.classList.remove('active');
+                convertButton.disabled = false;
+            } catch (err) {
+                console.error(err);
+                alert('Error converting document. Try a simpler document or use a professional service.');
+                loadingIndicator.classList.remove('active');
+                convertButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
