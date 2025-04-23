@@ -1,1 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer - Tools Wonder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
 
+        body {
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: #1e40af;
+            color: #fff;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 1rem;
+        }
+
+        .nav a:hover {
+            color: #93c5fd;
+        }
+
+        /* Main Section */
+        .main {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .main h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+
+        .main p {
+            font-size: 1.1rem;
+            color: #4b5563;
+            margin-bottom: 2rem;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .upload-section input[type="file"] {
+            display: none;
+        }
+
+        .upload-label {
+            display: inline-block;
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        .upload-label:hover {
+            background: #1e40af;
+        }
+
+        .dimensions-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+
+        .dimensions-section label {
+            font-size: 1rem;
+            color: #1e40af;
+            margin-right: 0.5rem;
+        }
+
+        .dimensions-section input[type="number"] {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            width: 100px;
+            font-size: 1rem;
+        }
+
+        .resize-button {
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .resize-button:hover {
+            background: #1e40af;
+        }
+
+        .resize-button:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        /* Preview Section */
+        .preview-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .preview-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .preview-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .preview-card h3 {
+            font-size: 1.2rem;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-card p {
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin-bottom: 1rem;
+        }
+
+        .download-button {
+            background: #2563eb;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            display: inline-block;
+        }
+
+        .download-button:hover {
+            background: #1e40af;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1e40af;
+            color: #fff;
+            padding: 2rem 0;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-logo h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo p {
+            font-size: 1rem;
+        }
+
+        .footer-contact p {
+            font-size: 1rem;
+        }
+
+        .footer-contact a {
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        .footer-links a {
+            color: #93c5fd;
+            text-decoration: none;
+            margin-left: 1rem;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header .container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav a {
+                margin: 0 0.75rem;
+            }
+
+            .main h1 {
+                font-size: 1.5rem;
+            }
+
+            .main p {
+                font-size: 1rem;
+            }
+
+            .upload-section {
+                padding: 1.5rem;
+            }
+
+            .dimensions-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .dimensions-section input[type="number"] {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .preview-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links a {
+                margin: 0 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">Tools Wonder</div>
+            <nav class="nav">
+                <a href="index.html">Home</a>
+                <a href="index.html#tools">Tools</a>
+                <a href="mailto:toolswonder1@gmail.com">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <section class="main">
+        <div class="container">
+            <h1>Image Resizer</h1>
+            <p>Resize your images to custom dimensions quickly and easily.</p>
+
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <label for="imageInput" class="upload-label">Choose Image</label>
+                <input type="file" id="imageInput" accept="image/*">
+                <div class="dimensions-section">
+                    <div>
+                        <label for="widthInput">Width (px):</label>
+                        <input type="number" id="widthInput" min="1" placeholder="e.g., 800">
+                    </div>
+                    <div>
+                        <label for="heightInput">Height (px):</label>
+                        <input type="number" id="heightInput" min="1" placeholder="e.g., 600">
+                    </div>
+                </div>
+                <button class="resize-button" id="resizeButton" disabled>Resize Image</button>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="preview-section" id="previewSection">
+                <!-- Preview cards will be dynamically added here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3>Tools Wonder</h3>
+                    <p>Simplifying your digital life.</p>
+                </div>
+                <div class="footer-contact">
+                    <p>Contact: <a href="mailto:toolswonder1@gmail.com">toolswonder1@gmail.com</a></p>
+                </div>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const widthInput = document.getElementById('widthInput');
+        const heightInput = document.getElementById('heightInput');
+        const resizeButton = document.getElementById('resizeButton');
+        const previewSection = document.getElementById('previewSection');
+
+        let originalImage = null;
+
+        // Enable resize button when an image and valid dimensions are provided
+        function updateResizeButton() {
+            const width = parseInt(widthInput.value);
+            const height = parseInt(heightInput.value);
+            resizeButton.disabled = !(originalImage && width > 0 && height > 0);
+        }
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                originalImage = file;
+                displayPreview(file, 'Original Image');
+                updateResizeButton();
+            } else {
+                alert('Please select a valid image file.');
+                imageInput.value = '';
+                resizeButton.disabled = true;
+                previewSection.innerHTML = '';
+                originalImage = null;
+            }
+        });
+
+        widthInput.addEventListener('input', updateResizeButton);
+        heightInput.addEventListener('input', updateResizeButton);
+
+        // Resize and display the resized image
+        resizeButton.addEventListener('click', () => {
+            if (!originalImage) return;
+
+            const width = parseInt(widthInput.value);
+            const height = parseInt(heightInput.value);
+
+            if (width <= 0 || height <= 0) {
+                alert('Please enter valid width and height values.');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Use original format or JPEG as fallback
+                    const mimeType = originalImage.type || 'image/jpeg';
+                    const resizedDataUrl = canvas.toDataURL(mimeType, 0.9);
+
+                    // Create a blob for download
+                    canvas.toBlob((blob) => {
+                        const url = URL.createObjectURL(blob);
+                        displayResizedPreview(resizedDataUrl, url, mimeType.split('/')[1].toUpperCase(), width, height);
+                    }, mimeType, 0.9);
+                };
+            };
+
+            reader.readAsDataURL(originalImage);
+        });
+
+        // Display original image preview
+        function displayPreview(file, title) {
+            previewSection.innerHTML = ''; // Clear previous previews
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const card = document.createElement('div');
+                card.className = 'preview-card';
+                card.innerHTML = `
+                    <img src="${e.target.result}" alt="${title}">
+                    <h3>${title}</h3>
+                    <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
+                `;
+                previewSection.appendChild(card);
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // Display resized image preview with download link
+        function displayResizedPreview(dataUrl, downloadUrl, format, width, height) {
+            const originalCard = previewSection.querySelector('.preview-card');
+            const resizedCard = document.createElement('div');
+            resizedCard.className = 'preview-card';
+
+            // Calculate approximate size (data URL length is rough estimate)
+            const sizeKB = ((dataUrl.length * 0.75) / 1024).toFixed(2);
+
+            resizedCard.innerHTML = `
+                <img src="${dataUrl}" alt="Resized Image">
+                <h3>Resized Image (${format})</h3>
+                <p>Size: ${sizeKB} KB</p>
+                <p>Dimensions: ${width}x${height}px</p>
+                <a href="${downloadUrl}" download="resized-image.${format.toLowerCase()}" class="download-button">Download</a>
+            `;
+
+            previewSection.innerHTML = '';
+            previewSection.appendChild(originalCard);
+            previewSection.appendChild(resizedCard);
+        }
+    </script>
+</body>
+</html>
