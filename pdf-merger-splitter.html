@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Merger & Splitter - Tools Wonder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: #1e40af;
+            color: #fff;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 1rem;
+        }
+
+        .nav a:hover {
+            color: #93c5fd;
+        }
+
+        /* Main Section */
+        .main {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .main h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+
+        .main p {
+            font-size: 1.1rem;
+            color: #4b5563;
+            margin-bottom: 2rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-button {
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .tab-button:hover {
+            background: #1e40af;
+        }
+
+        .tab-button.active {
+            background: #1e40af;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .upload-section input[type="file"] {
+            display: none;
+        }
+
+        .upload-label {
+            display: inline-block;
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        .upload-label:hover {
+            background: #1e40af;
+        }
+
+        .file-list {
+            margin: 1rem 0;
+            text-align: left;
+        }
+
+        .file-list p {
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin: 0.5rem 0;
+        }
+
+        .split-options {
+            margin: 1rem 0;
+            text-align: left;
+        }
+
+        .split-options label {
+            font-size: 1rem;
+            color: #1e40af;
+            margin-right: 0.5rem;
+        }
+
+        .split-options input[type="text"] {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 200px;
+            font-size: 1rem;
+        }
+
+        .action-button {
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 1rem;
+        }
+
+        .action-button:hover {
+            background: #1e40af;
+        }
+
+        .action-button:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        /* Result Section */
+        .result-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            margin: 2rem auto;
+            display: none;
+        }
+
+        .result-section.active {
+            display: block;
+        }
+
+        .result-section h3 {
+            font-size: 1.2rem;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-section p {
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin-bottom: 1rem;
+        }
+
+        .download-button {
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background 0.3s;
+            display: inline-block;
+            margin: 0.5rem;
+        }
+
+        .download-button:hover {
+            background: #1e40af;
+        }
+
+        /* Loading Indicator */
+        .loading {
+            display: none;
+            font-size: 1rem;
+            color: #1e40af;
+            margin-top: 1rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        /* Note Section */
+        .note-section {
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .note-section a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .note-section a:hover {
+            color: #1e40af;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1e40af;
+            color: #fff;
+            padding: 2rem 0;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-logo h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo p {
+            font-size: 1rem;
+        }
+
+        .footer-contact p {
+            font-size: 1rem;
+        }
+
+        .footer-contact a {
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        .footer-links a {
+            color: #93c5fd;
+            text-decoration: none;
+            margin-left: 1rem;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header .container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav a {
+                margin: 0 0.75rem;
+            }
+
+            .main h1 {
+                font-size: 1.5rem;
+            }
+
+            .main p {
+                font-size: 1rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .upload-section {
+                padding: 1.5rem;
+            }
+
+            .split-options input[type="text"] {
+                width: 100%;
+            }
+
+            .result-section {
+                padding: 1rem;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links a {
+                margin: 0 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">Tools Wonder</div>
+            <nav class="nav">
+                <a href="index.html">Home</a>
+                <a href="index.html#tools">Tools</a>
+                <a href="mailto:toolswonder1@gmail.com">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <section class="main">
+        <div class="container">
+            <h1>PDF Merger & Splitter</h1>
+            <p>Merge multiple PDFs into one or split a PDF into individual pages or custom ranges.</p>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-button active" id="mergeTab">Merge PDFs</button>
+                <button class="tab-button" id="splitTab">Split PDF</button>
+            </div>
+
+            <!-- Merge Section -->
+            <div class="upload-section" id="mergeSection">
+                <label for="mergeInput" class="upload-label">Choose PDF Files</label>
+                <input type="file" id="mergeInput" accept="application/pdf" multiple>
+                <div class="file-list" id="mergeFileList"></div>
+                <button class="action-button" id="mergeButton" disabled>Merge PDFs</button>
+                <div class="loading" id="mergeLoading">Merging... Please wait.</div>
+                <div class="note-section">
+                    Note: For complex PDFs, consider using a <a href="https://www.ilovepdf.com/merge_pdf" target="_blank">professional service</a>.
+                </div>
+            </div>
+
+            <!-- Split Section -->
+            <div class="upload-section" id="splitSection" style="display: none;">
+                <label for="splitInput" class="upload-label">Choose PDF File</label>
+                <input type="file" id="splitInput" accept="application/pdf">
+                <div class="file-list" id="splitFileList"></div>
+                <div class="split-options">
+                    <label>Split Mode:</label>
+                    <select id="splitMode">
+                        <option value="all">Split into individual pages</option>
+                        <option value="range">Split by page range</option>
+                    </select>
+                    <div id="rangeInput" style="display: none; margin-top: 1rem;">
+                        <label for="pageRange">Page Range (e.g., 1-3, 5):</label>
+                        <input type="text" id="pageRange" placeholder="e.g., 1-3, 5">
+                    </div>
+                </div>
+                <button class="action-button" id="splitButton" disabled>Split PDF</button>
+                <div class="loading" id="splitLoading">Splitting... Please wait.</div>
+                <div class="note-section">
+                    Note: For complex PDFs, consider using a <a href="https://www.ilovepdf.com/split_pdf" target="_blank">professional service</a>.
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-section" id="resultSection">
+                <h3>Result</h3>
+                <p id="resultInfo"></p>
+                <div id="downloadLinks"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3>Tools Wonder</h3>
+                    <p>Simplifying your digital life.</p>
+                </div>
+                <div class="footer-contact">
+                    <p>Contact: <a href="mailto:toolswonder1@gmail.com">toolswonder1@gmail.com</a></p>
+                </div>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mergeTab = document.getElementById('mergeTab');
+        const splitTab = document.getElementById('splitTab');
+        const mergeSection = document.getElementById('mergeSection');
+        const splitSection = document.getElementById('splitSection');
+        const mergeInput = document.getElementById('mergeInput');
+        const splitInput = document.getElementById('splitInput');
+        const mergeFileList = document.getElementById('mergeFileList');
+        const splitFileList = document.getElementById('splitFileList');
+        const mergeButton = document.getElementById('mergeButton');
+        const splitButton = document.getElementById('splitButton');
+        const mergeLoading = document.getElementById('mergeLoading');
+        const splitLoading = document.getElementById('splitLoading');
+        const resultSection = document.getElementById('resultSection');
+        const resultInfo = document.getElementById('resultInfo');
+        const downloadLinks = document.getElementById('downloadLinks');
+        const splitMode = document.getElementById('splitMode');
+        const rangeInput = document.getElementById('rangeInput');
+        const pageRange = document.getElementById('pageRange');
+
+        let mergeFiles = [];
+        let splitFile = null;
+
+        // Tab switching
+        mergeTab.addEventListener('click', () => {
+            mergeTab.classList.add('active');
+            splitTab.classList.remove('active');
+            mergeSection.style.display = 'block';
+            splitSection.style.display = 'none';
+            resultSection.classList.remove('active');
+        });
+
+        splitTab.addEventListener('click', () => {
+            splitTab.classList.add('active');
+            mergeTab.classList.remove('active');
+            splitSection.style.display = 'block';
+            mergeSection.style.display = 'none';
+            resultSection.classList.remove('active');
+        });
+
+        // Merge file input
+        mergeInput.addEventListener('change', (e) => {
+            mergeFiles = Array.from(e.target.files).filter(file => file.type === 'application/pdf');
+            if (mergeFiles.length === 0) {
+                alert('Please select valid PDF files.');
+                mergeInput.value = '';
+                mergeButton.disabled = true;
+                mergeFileList.innerHTML = '';
+                mergeFiles = [];
+            } else {
+                mergeButton.disabled = mergeFiles.length < 2;
+                mergeFileList.innerHTML = mergeFiles.map(file => `<p>${file.name} (${(file.size / 1024).toFixed(2)} KB)</p>`).join('');
+            }
+        });
+
+        // Split file input
+        splitInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type === 'application/pdf') {
+                splitFile = file;
+                splitButton.disabled = false;
+                splitFileList.innerHTML = `<p>${file.name} (${(file.size / 1024).toFixed(2)} KB)</p>`;
+            } else {
+                alert('Please select a valid PDF file.');
+                splitInput.value = '';
+                splitButton.disabled = true;
+                splitFileList.innerHTML = '';
+                splitFile = null;
+            }
+        });
+
+        // Toggle split mode
+        splitMode.addEventListener('change', () => {
+            rangeInput.style.display = splitMode.value === 'range' ? 'block' : 'none';
+        });
+
+        // Merge PDFs
+        mergeButton.addEventListener('click', async () => {
+            if (mergeFiles.length < 2) return;
+
+            mergeLoading.classList.add('active');
+            mergeButton.disabled = true;
+
+            try {
+                const mergedPdf = await PDFLib.PDFDocument.create();
+                for (const file of mergeFiles) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+                    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                    copiedPages.forEach(page => mergedPdf.addPage(page));
+                }
+
+                const pdfBytes = await mergedPdf.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+
+                // Update result section
+                resultInfo.textContent = `Merged PDF created successfully. Size: ${(blob.size / 1024).toFixed(2)} KB`;
+                downloadLinks.innerHTML = `<a href="${url}" download="merged-document.pdf" class="download-button">Download Merged PDF</a>`;
+                resultSection.classList.add('active');
+
+                mergeLoading.classList.remove('active');
+                mergeButton.disabled = false;
+            } catch (err) {
+                console.error(err);
+                alert('Error merging PDFs. Try different PDFs or use a professional service.');
+                mergeLoading.classList.remove('active');
+                mergeButton.disabled = false;
+            }
+        });
+
+        // Split PDF
+        splitButton.addEventListener('click', async () => {
+            if (!splitFile) return;
+
+            splitLoading.classList.add('active');
+            splitButton.disabled = true;
+
+            try {
+                const arrayBuffer = await splitFile.arrayBuffer();
+                const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+                const totalPages = pdf.getPageCount();
+
+                let pagesToSplit = [];
+                if (splitMode.value === 'all') {
+                    pagesToSplit = Array.from({ length: totalPages }, (_, i) => i);
+                } else {
+                    const ranges = pageRange.value.split(',').map(range => range.trim());
+                    for (const range of ranges) {
+                        if (range.includes('-')) {
+                            const [start, end] = range.split('-').map(num => parseInt(num.trim()));
+                            if (isNaN(start) || isNaN(end) || start < 1 || end > totalPages || start > end) {
+                                throw new Error('Invalid page range.');
+                            }
+                            for (let i = start - 1; i < end; i++) {
+                                pagesToSplit.push(i);
+                            }
+                        } else {
+                            const page = parseInt(range);
+                            if (isNaN(page) || page < 1 || page > totalPages) {
+                                throw new Error('Invalid page number.');
+                            }
+                            pagesToSplit.push(page - 1);
+                        }
+                    }
+                    pagesToSplit = [...new Set(pagesToSplit)].sort((a, b) => a - b);
+                }
+
+                const downloadLinksHtml = [];
+                for (const pageIndex of pagesToSplit) {
+                    const newPdf = await PDFLib.PDFDocument.create();
+                    const [copiedPage] = await newPdf.copyPages(pdf, [pageIndex]);
+                    newPdf.addPage(copiedPage);
+
+                    const pdfBytes = await newPdf.save();
+                    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                    const url = URL.createObjectURL(blob);
+                    downloadLinksHtml.push(`<a href="${url}" download="page-${pageIndex + 1}.pdf" class="download-button">Download Page ${pageIndex + 1}</a>`);
+                }
+
+                // Update result section
+                resultInfo.textContent = `Split ${pagesToSplit.length} page(s) successfully.`;
+                downloadLinks.innerHTML = downloadLinksHtml.join('');
+                resultSection.classList.add('active');
+
+                splitLoading.classList.remove('active');
+                splitButton.disabled = false;
+            } catch (err) {
+                console.error(err);
+                alert('Error splitting PDF. Check page range or use a professional service.');
+                splitLoading.classList.remove('active');
+                splitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
