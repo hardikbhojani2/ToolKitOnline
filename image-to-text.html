@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Text (OCR) - Tools Wonder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/tesseract.js@4.0.9/dist/tesseract.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: #1e40af;
+            color: #fff;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 1rem;
+        }
+
+        .nav a:hover {
+            color: #93c5fd;
+        }
+
+        /* Main Section */
+        .main {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .main h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+
+        .main p {
+            font-size: 1.1rem;
+            color: #4b5563;
+            margin-bottom: 2rem;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .upload-section input[type="file"] {
+            display: none;
+        }
+
+        .upload-label {
+            display: inline-block;
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        .upload-label:hover {
+            background: #1e40af;
+        }
+
+        .extract-button {
+            background: #2563eb;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .extract-button:hover {
+            background: #1e40af;
+        }
+
+        .extract-button:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        /* Preview and Text Section */
+        .preview-text-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .preview-card, .text-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .preview-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .preview-card h3, .text-card h3 {
+            font-size: 1.2rem;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-card p, .text-card p {
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin-bottom: 1rem;
+        }
+
+        .text-card textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+
+        .copy-button {
+            background: #2563eb;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .copy-button:hover {
+            background: #1e40af;
+        }
+
+        /* Loading Indicator */
+        .loading {
+            display: none;
+            font-size: 1rem;
+            color: #1e40af;
+            margin-top: 1rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header .container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav a {
+                margin: 0 0.75rem;
+            }
+
+            .main h1 {
+                font-size: 1.5rem;
+            }
+
+            .main p {
+                font-size: 1rem;
+            }
+
+            .upload-section {
+                padding: 1.5rem;
+            }
+
+            .preview-text-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .preview-card, .text-card {
+                max-width: 100%;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links a {
+                margin: 0 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">Tools Wonder</div>
+            <nav class="nav">
+                <a href="index.html">Home</a>
+                <a href="index.html#tools">Tools</a>
+                <a href="mailto:toolswonder1@gmail.com">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <section class="main">
+        <div class="container">
+            <h1>Image to Text (OCR)</h1>
+            <p>Extract text from images quickly and accurately.</p>
+
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <label for="imageInput" class="upload-label">Choose Image</label>
+                <input type="file" id="imageInput" accept="image/*">
+                <button class="extract-button" id="extractButton" disabled>Extract Text</button>
+                <div class="loading" id="loadingIndicator">Processing... Please wait.</div>
+            </div>
+
+            <!-- Preview and Text Section -->
+            <div class="preview-text-section" id="previewTextSection">
+                <!-- Preview and text cards will be dynamically added here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3>Tools Wonder</h3>
+                    <p>Simplifying your digital life.</p>
+                </div>
+                <div class="footer-contact">
+                    <p>Contact: <a href="mailto:toolswonder1@gmail.com">toolswonder1@gmail.com</a></p>
+                </div>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const extractButton = document.getElementById('extractButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const previewTextSection = document.getElementById('previewTextSection');
+
+        let originalImage = null;
+
+        // Enable extract button when an image is selected
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                originalImage = file;
+                extractButton.disabled = false;
+                displayPreview(file, 'Uploaded Image');
+                previewTextSection.querySelector('.text-card')?.remove();
+            } else {
+                alert('Please select a valid image file.');
+                imageInput.value = '';
+                extractButton.disabled = true;
+                previewTextSection.innerHTML = '';
+                originalImage = null;
+            }
+        });
+
+        // Extract text using Tesseract.js
+        extractButton.addEventListener('click', () => {
+            if (!originalImage) return;
+
+            loadingIndicator.classList.add('active');
+            extractButton.disabled = true;
+
+            Tesseract.recognize(
+                originalImage,
+                'eng',
+                {
+                    logger: (m) => console.log(m) // Optional: Log progress
+                }
+            ).then(({ data: { text } }) => {
+                displayExtractedText(text);
+                loadingIndicator.classList.remove('active');
+                extractButton.disabled = false;
+            }).catch((err) => {
+                console.error(err);
+                alert('Error extracting text. Please try again.');
+                loadingIndicator.classList.remove('active');
+                extractButton.disabled = false;
+            });
+        });
+
+        // Display uploaded image preview
+        function displayPreview(file, title) {
+            previewTextSection.innerHTML = ''; // Clear previous content
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const card = document.createElement('div');
+                card.className = 'preview-card';
+                card.innerHTML = `
+                    <img src="${e.target.result}" alt="${title}">
+                    <h3>${title}</h3>
+                    <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
+                `;
+                previewTextSection.appendChild(card);
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // Display extracted text
+        function displayExtractedText(text) {
+            const textCard = document.createElement('div');
+            textCard.className = 'text-card';
+            textCard.innerHTML = `
+                <h3>Extracted Text</h3>
+                <textarea readonly>${text}</textarea>
+                <button class="copy-button">Copy Text</button>
+            `;
+            previewTextSection.appendChild(textCard);
+
+            // Add copy functionality
+            const copyButton = textCard.querySelector('.copy-button');
+            copyButton.addEventListener('click', () => {
+                const textarea = textCard.querySelector('textarea');
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    copyButton.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy Text';
+                    }, 2000);
+                } catch (err) {
+                    console.error('Copy failed:', err);
+                    alert('Failed to copy text.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
