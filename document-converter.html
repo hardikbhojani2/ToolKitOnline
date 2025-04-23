@@ -393,6 +393,13 @@
 
         let inputFile = null;
 
+        // Sanitize text for PDF output (remove unsupported characters)
+        function sanitizeTextForPDF(text) {
+            // Replace U+FFFD and other non-WinAnsi characters with a space
+            // Allow basic ASCII printable characters (32-126) and common Latin-1
+            return text.replace(/[^\x20-\x7E\xA0-\xFF]/g, ' ');
+        }
+
         // Handle file input
         docInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -462,19 +469,39 @@
                 // Generate output based on output type
                 if (outputType === 'pdf') {
                     const pdfDoc = await PDFLib.PDFDocument.create();
-                    const page = pdfDoc.addPage();
+                    let page = pdfDoc.addPage();
                     const { width, height } = page.getSize();
                     const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
                     const fontSize = 12;
-                    const lines = textContent.split('\n');
+                    const lines = textContent.split('\n').map(line => sanitizeTextForPDF(line));
                     let y = height - 50;
                     for (const line of lines) {
                         if (y < 50) {
                             page = pdfDoc.addPage();
                             y = height - 50;
                         }
-                        page.drawText(line, { x: 50, y, font, size: fontSize });
-                        y -= fontSize + 5;
+                        // Split long lines to fit page width
+                        const maxWidth = width - 100; // Margin of 50 on each side
+                        let currentLine = '';
+                        for (const word of line.split(' ')) {
+                            const testLine = currentLine + word + ' ';
+                            const textWidth = font.widthOfTextAtSize(testLine, fontSize);
+                            if (textWidth > maxWidth && currentLine) {
+                                page.drawText(currentLine.trim(), { x: 50, y, font, size: fontSize });
+                                y -= fontSize + 5;
+                                if (y < 50) {
+                                    page = pdfDoc.addPage();
+                                    y = height - 50;
+                                }
+                                currentLine = word + ' ';
+                            } else {
+                                currentLine = testLine;
+                            }
+                        }
+                        if (currentLine) {
+                            page.drawText(currentLine.trim(), { x: 50, y, font, size: fontSize });
+                            y -= fontSize + 5;
+                        }
                     }
                     const pdfBytes = await pdfDoc.save();
                     blob = new Blob([pdfBytes], { type: 'application/pdf' });
